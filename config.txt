@@ -1,0 +1,3 @@
+ZDROJE=www.zive.cz;www.cnews.cz;www.root.cz;www.pctuning.cz;www.seznam.cz;www.seznamzpravy.cz;www.novinky.cz;www.idnes.cz;www.aktualne.cz;www.hn.cz;www.denik.cz;www.ceskatelevize.cz;www.nova.cz;www.iprima.cz
+KLICOVA_SLOVA=pojišťovnictví;pojišťovna;pojišťovny
+BLACKLIST=zdravotní pojištění;sociální pojištění
