@@ -1,23 +1,16 @@
-{
-    "sources": [
-        "https://example.com/feed1",
-        "https://example.com/feed2"
-    ],
-    "keywords": [
-        "AI",
-        "technologie",
-        "výzkum"
-    ],
-    "oldest_date": "2023-01-01",
-    "newest_date": "2023-12-31",
-    "articles": [
-        {
-            "title": "Novinky v AI",
-            "summary": "Shrnutí článku o novinkách v AI."
-        },
-        {
-            "title": "Výzkum v oblasti strojového učení",
-            "summary": "Shrnutí výzkumu v oblasti ML."
-        }
-    ]
-}
+[Sources]
+urls = https://www.novinky.cz,https://www.idnes.cz,https://www.irozhlas.cz,https://www.seznamzpravy.cz
+
+[Keywords]
+include = AI,umělá inteligence,technologie,výzkum,robotika
+
+[Blacklist]
+exclude = bulvár,celebrity,sport,reklama
+
+[DateRange]
+newest = 2025-09-24
+oldest = 2024-09-24
+
+[Layout]
+width = 1280px
+articles_per_page = 10
