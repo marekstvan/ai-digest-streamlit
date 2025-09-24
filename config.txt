@@ -1,8 +1,5 @@
-[Settings]
-sources = Seznam Zprávy, iDnes, Novinky, Aktuálně
-keywords = pojištění, pojistka, riziko, škoda, klient, produkt, nabídka, výzkum
-blacklist = bulvár, celebrity, sport, recepty
-date_to = 2025-09-24
-date_from = 2024-09-24
-articles_per_page = 10
-layout_width = 1280
+sources=www.zive.cz;www.cnews.cz;www.root.cz;www.pctuning.cz;www.seznam.cz;www.seznamzpravy.cz;www.novinky.cz;www.idnes.cz;www.aktualne.cz;www.hn.cz;www.denik.cz;www.ceskatelevize.cz;www.nova.cz;www.iprima.cz
+keywords=pojišťovnictví;pojišťovna;pojišťovny
+blacklist=zdravotní pojištění;sociální pojištění
+date_from=2023-10-01
+date_to=2024-10-01
