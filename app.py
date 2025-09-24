@@ -1,61 +1,75 @@
+
 import streamlit as st
-import requests
-from bs4 import BeautifulSoup
-from urllib.parse import urljoin
-import math
+import os
+from datetime import datetime
 
-# Title of the app
-st.title("Můj AI Digest")
+CONFIG_FILE = "config.txt"
 
-# Input fields
-urls_input = st.text_area("Zadejte URL adresy (každá na nový řádek):")
-keywords_input = st.text_input("Zadejte klíčová slova (oddělená čárkou):")
-blacklist_input = st.text_input("Zadejte blacklist slova (oddělená čárkou):")
+def load_config():
+    config = {
+        "sources": "",
+        "keywords": "",
+        "oldest_date": "",
+        "newest_date": "",
+    }
+    if os.path.exists(CONFIG_FILE):
+        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
+            for line in f:
+                if "=" in line:
+                    key, value = line.strip().split("=", 1)
+                    config[key] = value
+    return config
 
-# Pagination settings
-items_per_page = 5
-page = st.number_input("Stránka", min_value=1, value=1)
+def save_config(config):
+    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
+        for key, value in config.items():
+            f.write(f"{key}={value}\n")
 
-# Process inputs
-urls = [url.strip() for url in urls_input.splitlines() if url.strip()]
-keywords = [kw.strip().lower() for kw in keywords_input.split(",") if kw.strip()]
-blacklist = [bl.strip().lower() for bl in blacklist_input.split(",") if bl.strip()]
+def main():
+    st.set_page_config(layout="wide")
+    st.title("📰 Můj AI Digest")
 
-def fetch_and_filter(url, keywords, blacklist):
-    try:
-        response = requests.get(url)
-        soup = BeautifulSoup(response.text, 'html.parser')
-        title = soup.title.string if soup.title else "Bez názvu"
-        text = soup.get_text().lower()
-        if any(kw in text for kw in keywords) and not any(bl in text for bl in blacklist):
-            img_tag = soup.find("img")
-            img_url = urljoin(url, img_tag['src']) if img_tag and img_tag.get('src') else None
-            perex = ' '.join(text.split()[:50]) + "..."
-            return {"url": url, "title": title, "img": img_url, "perex": perex}
-    except Exception:
-        return None
-    return None
+    config = load_config()
 
-# Collect results
-results = []
-for url in urls:
-    result = fetch_and_filter(url, keywords, blacklist)
-    if result:
-        results.append(result)
+    with st.form("config_form"):
+        sources = st.text_area("Zdroje (URL adresy oddělené novým řádkem)", value=config.get("sources", ""), height=150)
+        keywords = st.text_input("Klíčová slova", value=config.get("keywords", ""))
+        col1, col2 = st.columns(2)
+        with col1:
+            oldest_date = st.date_input("Nejstarší datum článku", value=datetime.strptime(config.get("oldest_date"), "%Y-%m-%d") if config.get("oldest_date") else None)
+        with col2:
+            newest_date = st.date_input("Nejnovější datum článku", value=datetime.strptime(config.get("newest_date"), "%Y-%m-%d") if config.get("newest_date") else None)
 
-# Pagination logic
-total_pages = math.ceil(len(results) / items_per_page)
-start_idx = (page - 1) * items_per_page
-end_idx = start_idx + items_per_page
-paginated_results = results[start_idx:end_idx]
+        submitted = st.form_submit_button("💾 Uložit konfiguraci")
+        if submitted:
+            config["sources"] = sources
+            config["keywords"] = keywords
+            config["oldest_date"] = oldest_date.strftime("%Y-%m-%d") if oldest_date else ""
+            config["newest_date"] = newest_date.strftime("%Y-%m-%d") if newest_date else ""
+            save_config(config)
+            st.success("Konfigurace byla uložena.")
 
-# Display results
-for res in paginated_results:
-    st.subheader(res["title"])
-    if res["img"]:
-        st.image(res["img"], use_column_width=True)
-    st.write(res["perex"])
-    st.markdown(f"[Otevřít článek]({res['url']})")
+    st.markdown("---")
+    st.subheader("📄 Výsledky")
 
-# Display page info
-st.write(f"Stránka {page} z {total_pages}")
+    # Simulace výsledků pro demonstraci
+    results = [f"Článek {i+1}" for i in range(50)]
+    page_size = 5
+    if "page" not in st.session_state:
+        st.session_state.page = 0
+
+    start = st.session_state.page * page_size
+    end = start + page_size
+    for result in results[start:end]:
+        st.write(result)
+
+    col1, col2 = st.columns([1, 1])
+    with col1:
+        if st.button("⬅️ Předchozí") and st.session_state.page > 0:
+            st.session_state.page -= 1
+    with col2:
+        if st.button("➡️ Další") and end < len(results):
+            st.session_state.page += 1
+
+if __name__ == "__main__":
+    main()

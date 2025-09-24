@@ -1,3 +1,23 @@
-ZDROJE=www.zive.cz;www.cnews.cz;www.root.cz;www.pctuning.cz;www.seznam.cz;www.seznamzpravy.cz;www.novinky.cz;www.idnes.cz;www.aktualne.cz;www.hn.cz;www.denik.cz;www.ceskatelevize.cz;www.nova.cz;www.iprima.cz
-KLICOVA_SLOVA=pojišťovnictví;pojišťovna;pojišťovny
-BLACKLIST=zdravotní pojištění;sociální pojištění
+{
+    "sources": [
+        "https://example.com/feed1",
+        "https://example.com/feed2"
+    ],
+    "keywords": [
+        "AI",
+        "technologie",
+        "výzkum"
+    ],
+    "oldest_date": "2023-01-01",
+    "newest_date": "2023-12-31",
+    "articles": [
+        {
+            "title": "Novinky v AI",
+            "summary": "Shrnutí článku o novinkách v AI."
+        },
+        {
+            "title": "Výzkum v oblasti strojového učení",
+            "summary": "Shrnutí výzkumu v oblasti ML."
+        }
+    ]
+}
