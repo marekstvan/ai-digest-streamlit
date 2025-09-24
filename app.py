@@ -1,99 +1,53 @@
-
 import streamlit as st
 import datetime
 
-CONFIG_FILE = "config.txt"
-DEFAULT_CONFIG = {
-    "sources": "www.zive.cz;www.cnews.cz;www.root.cz;www.pctuning.cz;www.seznam.cz;www.seznamzpravy.cz;www.novinky.cz;www.idnes.cz;www.aktualne.cz;www.hn.cz;www.denik.cz;www.ceskatelevize.cz;www.nova.cz;www.iprima.cz",
-    "keywords": "pojišťovnictví;pojišťovna;pojišťovny",
-    "blacklist": "zdravotní pojištění;sociální pojištění",
-    "date_from": str(datetime.date.today().replace(year=datetime.date.today().year - 1)),
-    "date_to": str(datetime.date.today())
+# Constants
+PAGE_WIDTH = 1280
+ARTICLES_PER_PAGE = 10
+
+# Default configuration
+default_config = {
+    "sources": ["https://www.rozhlas.cz", "https://www.novinky.cz", "https://www.seznamzpravy.cz"],
+    "keywords": ["pojištění", "pojistka", "riziko", "škoda", "úraz", "zabezpečení", "odpovědnost"],
+    "blacklist": ["sport", "celebrita", "recept", "bulvár"],
+    "date_from": (datetime.date.today() - datetime.timedelta(days=365)).isoformat(),
+    "date_to": datetime.date.today().isoformat()
 }
 
-def load_config():
-    try:
-        with open(CONFIG_FILE, "r", encoding="utf-8") as f:
-            lines = f.readlines()
-        config = {}
-        for line in lines:
-            if "=" in line:
-                key, value = line.strip().split("=", 1)
-                config[key] = value
-        return config
-    except FileNotFoundError:
-        return DEFAULT_CONFIG.copy()
+# Session state initialization
+if "config" not in st.session_state:
+    st.session_state.config = default_config.copy()
 
-def save_config(config):
-    with open(CONFIG_FILE, "w", encoding="utf-8") as f:
-        for key, value in config.items():
-            f.write(f"{key}={value}\n")
-
-def mock_fetch_articles(config):
-    # Simulate fetching articles based on keywords and blacklist
-    articles = []
-    for i in range(1, 51):
-        title = f"Článek {i}: Vývoj v pojišťovnictví"
-        url = f"https://example.com/article{i}"
-        if any(kw in title for kw in config["keywords"].split(";")) and not any(bl in title for bl in config["blacklist"].split(";")):
-            articles.append({"title": title, "url": url})
-    return articles
-
-# Streamlit layout
+# Layout settings
 st.set_page_config(layout="wide")
-st.markdown("<style>div.block-container{max-width:1280px !important;}</style>", unsafe_allow_html=True)
-st.title("📰 Můj AI Digest")
+st.markdown("<style>.reportview-container .main { max-width: 1280px; margin: auto; }</style>", unsafe_allow_html=True)
 
-config = load_config()
+st.title("Můj AI Digest")
 
-with st.form("config_form"):
-    sources = st.text_area("Zdroje (oddělené středníkem)", config.get("sources", ""))
-    keywords = st.text_input("Klíčová slova (oddělená středníkem)", config.get("keywords", ""))
-    blacklist = st.text_input("Blacklist slov (oddělený středníkem)", config.get("blacklist", ""))
-    date_from = st.date_input("Datum od", datetime.date.fromisoformat(config.get("date_from", DEFAULT_CONFIG["date_from"])))
-    date_to = st.date_input("Datum do", datetime.date.fromisoformat(config.get("date_to", DEFAULT_CONFIG["date_to"])))
-    submitted = st.form_submit_button("💾 Uložit konfiguraci")
+# Configuration editor
+st.subheader("Konfigurace")
+sources = st.text_area("Seznam zdrojů (oddělené čárkou)", ", ".join(st.session_state.config["sources"]))
+keywords = st.text_area("Klíčová slova (oddělená čárkou)", ", ".join(st.session_state.config["keywords"]))
+blacklist = st.text_area("Blacklist slov (oddělený čárkou)", ", ".join(st.session_state.config["blacklist"]))
+date_from = st.date_input("Nejstarší datum článku", datetime.date.fromisoformat(st.session_state.config["date_from"]))
+date_to = st.date_input("Nejnovější datum článku", datetime.date.fromisoformat(st.session_state.config["date_to"]))
 
-    if submitted:
-        config["sources"] = sources
-        config["keywords"] = keywords
-        config["blacklist"] = blacklist
-        config["date_from"] = str(date_from)
-        config["date_to"] = str(date_to)
-        save_config(config)
-        st.success("Konfigurace byla uložena.")
+# Buttons to load default or updated config
+col1, col2 = st.columns(2)
+with col1:
+    if st.button("Načíst výchozí konfiguraci"):
+        st.session_state.config = default_config.copy()
+        st.experimental_rerun()
+with col2:
+    if st.button("Načíst upravenou konfiguraci"):
+        st.session_state.config = {
+            "sources": [s.strip() for s in sources.split(",")],
+            "keywords": [k.strip() for k in keywords.split(",")],
+            "blacklist": [b.strip() for b in blacklist.split(",")],
+            "date_from": date_from.isoformat(),
+            "date_to": date_to.isoformat()
+        }
 
-if st.button("🔄 Načíst výchozí hodnoty"):
-    config = DEFAULT_CONFIG.copy()
-    save_config(config)
-    st.experimental_rerun()
-
-if st.button("🌐 Načíst články"):
-    config = load_config()
-    articles = mock_fetch_articles(config)
-    st.session_state["articles"] = articles
-    st.session_state["page"] = 1
-
-# Pagination
-articles = st.session_state.get("articles", [])
-page = st.session_state.get("page", 1)
-articles_per_page = 10
-total_pages = (len(articles) - 1) // articles_per_page + 1
-
-if articles:
-    start = (page - 1) * articles_per_page
-    end = start + articles_per_page
-    for article in articles[start:end]:
-        st.markdown(f"**[{article['title']}]({article['url']})**")
-
-    col1, col2, col3 = st.columns([1, 2, 1])
-    with col1:
-        if page > 1 and st.button("⬅️ Předchozí"):
-            st.session_state["page"] -= 1
-            st.experimental_rerun()
-    with col3:
-        if page < total_pages and st.button("➡️ Další"):
-            st.session_state["page"] += 1
-            st.experimental_rerun()
-    with col2:
-        st.markdown(f"<p style='text-align:center;'>Stránka {page} z {total_pages}</p>", unsafe_allow_html=True)
+# Placeholder for article loading and filtering
+st.subheader("Výpis článků")
+st.info("Zde budou zobrazeny články podle zadané konfigurace. Funkce načítání a filtrování článků zatím není implementována.")
