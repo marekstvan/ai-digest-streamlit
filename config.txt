@@ -1,16 +1,8 @@
-[Sources]
-urls = https://www.novinky.cz,https://www.idnes.cz,https://www.irozhlas.cz,https://www.seznamzpravy.cz
-
-[Keywords]
-include = AI,umělá inteligence,technologie,výzkum,robotika
-
-[Blacklist]
-exclude = bulvár,celebrity,sport,reklama
-
-[DateRange]
-newest = 2025-09-24
-oldest = 2024-09-24
-
-[Layout]
-width = 1280px
+[Settings]
+sources = Seznam Zprávy, iDnes, Novinky, Aktuálně
+keywords = pojištění, pojistka, riziko, škoda, klient, produkt, nabídka, výzkum
+blacklist = bulvár, celebrity, sport, recepty
+date_to = 2025-09-24
+date_from = 2024-09-24
 articles_per_page = 10
+layout_width = 1280

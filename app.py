@@ -1,42 +1,32 @@
-import streamlit as st
-import requests
-from bs4 import BeautifulSoup
-import configparser
 
+import streamlit as st
+import configparser
+import os
+
+# Load configuration
 config = configparser.ConfigParser()
 config.read("config.txt", encoding="utf-8")
 
-sources = config.get("Sources", "urls").split(",")
-keywords = config.get("Keywords", "include").split(",")
-blacklist = config.get("Blacklist", "exclude").split(",")
-layout_width = config.get("Layout", "width")
-articles_per_page = config.getint("Layout", "articles_per_page")
+settings = config["Settings"]
+sources = [s.strip() for s in settings.get("sources", "").split(",")]
+keywords = [k.strip() for k in settings.get("keywords", "").split(",")]
+blacklist = [b.strip() for b in settings.get("blacklist", "").split(",")]
+date_from = settings.get("date_from", "")
+date_to = settings.get("date_to", "")
+articles_per_page = int(settings.get("articles_per_page", 10))
+layout_width = settings.get("layout_width", "1280")
 
+# Set page config
 st.set_page_config(layout="wide")
-st.markdown(f"<style>.reportview-container .main {{ max-width: {layout_width}; margin: auto; }}</style>", unsafe_allow_html=True)
-st.title("Můj AI Digest")
 
-def fetch_articles():
-    articles = []
-    for url in sources:
-        try:
-            response = requests.get(url)
-            soup = BeautifulSoup(response.content, "html.parser")
-            for link in soup.find_all("a", href=True):
-                text = link.get_text().strip()
-                href = link["href"]
-                if any(kw.lower() in text.lower() for kw in keywords) and not any(bl.lower() in text.lower() for bl in blacklist):
-                    articles.append({"title": text, "url": href})
-        except Exception as e:
-            st.error(f"Chyba při načítání z {url}: {e}")
-    return articles
+# Display configuration summary
+st.title("Můj AI Digest – Pojišťovnictví")
+st.markdown(f"**Zdroje:** {', '.join(sources)}")
+st.markdown(f"**Klíčová slova:** {', '.join(keywords)}")
+st.markdown(f"**Blacklist:** {', '.join(blacklist)}")
+st.markdown(f"**Období:** {date_from} až {date_to}")
+st.markdown(f"**Počet článků na stránku:** {articles_per_page}")
+st.markdown(f"**Šířka layoutu:** {layout_width}px")
 
-all_articles = fetch_articles()
-total_pages = (len(all_articles) + articles_per_page - 1) // articles_per_page
-page = st.sidebar.slider("Stránka", 1, total_pages, 1)
-
-start = (page - 1) * articles_per_page
-end = start + articles_per_page
-for article in all_articles[start:end]:
-    st.subheader(article["title"])
-    st.markdown(f"[Otevřít článek]({article['url']})")
+# Placeholder for article loading
+st.info("Načítání článků z reálných zdrojů zatím není implementováno.")
